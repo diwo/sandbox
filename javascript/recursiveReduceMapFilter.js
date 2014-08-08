@@ -35,8 +35,12 @@ assert.assertEqualArrays(
 // --- Map ---
 
 var map = function(l, f) {
-  if (!l.length) { return []; }
-  return [f(l[0])].concat(map(l.slice(1), f));
+  // Some day we will have ES6 and TCO...
+  var mapOptimized = function(l, f, a) {
+    if (!l.length) { return a; }
+    return mapOptimized(l.slice(1), f, a.concat(f(l[0])));
+  };
+  return mapOptimized(l, f, []);
 };
 
 assert.assertEqualArrays(
