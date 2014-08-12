@@ -5,7 +5,7 @@ var InvalidArgumentError = error.InvalidArgumentError;
 var AssertionError = error.AssertionError;
 
 var enhanceMessageWithExpectation = function(message, expectedValue, actualValue) {
-  message = message ? '"' + message + '" - ' : "";
+  message = message ? "'" + message + "' - " : "";
   message += "Expected:'" + expectedValue + "' Got:'" + actualValue + "'";
   return message;
 };
@@ -41,11 +41,11 @@ var assertEqualArrays = function(expectedArray, actualArray, message) {
     if (expectedArray.length !== actualArray.length) { return false; }
     if (expectedArray.length === 0) { return true; }
     if (Array.isArray(expectedArray[0]) && Array.isArray(actualArray[0])) {
-      return equalArrays(expectedArray[0], actualArray[0])
-          && equalArrays(expectedArray.slice(1), actualArray.slice(1));
+      return equalArrays(expectedArray[0], actualArray[0]) &&
+             equalArrays(expectedArray.slice(1), actualArray.slice(1));
     }
-    return expectedArray[0] === actualArray[0]
-        && equalArrays(expectedArray.slice(1), actualArray.slice(1));
+    return expectedArray[0] === actualArray[0] &&
+           equalArrays(expectedArray.slice(1), actualArray.slice(1));
   };
 
   message = enhanceMessageWithExpectation(message, JSON.stringify(expectedArray), JSON.stringify(actualArray));
