@@ -20,6 +20,13 @@ var assertTrue = function(condition, message) {
   }
 };
 
+var assertFalse = function(condition, message) {
+  if (arguments.length < 1) {
+    throw new InvalidArgumentError("Assertion must have a success condition.");
+  }
+  return assertTrue(!condition, message);
+};
+
 var assertEqual = function(expectedValue, actualValue, message) {
   if (arguments.length < 2) {
     throw new InvalidArgumentError("Assertion must have expected value and actual value.");
@@ -54,6 +61,7 @@ var assertEqualArrays = function(expectedArray, actualArray, message) {
 
 module.exports = {
   assertTrue: assertTrue,
+  assertFalse: assertFalse,
   assertEqual: assertEqual,
   assertEqualArrays: assertEqualArrays
 };
