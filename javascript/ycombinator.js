@@ -13,6 +13,7 @@ var verifyFactorial = function (factorial) {
   assert.assertEqual(120, factorial(5));
 };
 
+// Standard recursive factorial definition.
 verifyFactorial(
   (function () {
     var factorial = function (num) {
@@ -23,6 +24,33 @@ verifyFactorial(
   }())
 );
 
+// After removing the use of a function reference, factorial can't
+// recursively call itself anymore. Each recursive call is inlined instead.
+// The factorial function is defined for numbers up to 5.
+verifyFactorial(
+  function (num) {
+    if (num === 0) { return 1; }
+    return (function (num) {
+      if (num === 0) { return 1; }
+      return (function (num) {
+        if (num === 0) { return 1; }
+        return (function (num) {
+          if (num === 0) { return 1; }
+          return (function (num) {
+            if (num === 0) { return 1; }
+            return (function (num) {
+              if (num === 0) { return 1; }
+              return ((undefined)(num - 1)) * num;
+            }(num - 1)) * num;
+          }(num - 1)) * num;
+        }(num - 1)) * num;
+      }(num - 1)) * num;
+    }(num - 1)) * num;
+  }
+);
+
+// At each recursion level, we can extract the anonymous function out as
+// the parameter of a new immediately invoked generator function.
 verifyFactorial(
   (function (factorial4) {
     return function (num) {
@@ -67,6 +95,7 @@ verifyFactorial(
   ))
 );
 
+// The factorial generator functions can be refactored into a single function.
 verifyFactorial(
   (function (makeFactorial) {
     return makeFactorial(
@@ -85,6 +114,9 @@ verifyFactorial(
   ))
 );
 
+// Instead of generating a factorial function first and passing it to the
+// generator function to be consumed, give the generator function access to
+// itself so that it can generate the recursive factorial function for itself.
 verifyFactorial(
   (function (makeFactorial) {
     return makeFactorial(makeFactorial);
@@ -98,6 +130,9 @@ verifyFactorial(
   ))
 );
 
+// Even though makeFactorial(makeFactorial) returns a proper recursive factorial
+// function, it needs to be encapsulated here so that it will not get stuck in an
+// evaluation loop when it's extracted out as a function parameter in the next step.
 verifyFactorial(
   (function (makeFactorial) {
     return makeFactorial(makeFactorial);
@@ -113,6 +148,8 @@ verifyFactorial(
   ))
 );
 
+// The call to makeFactorial(makeFactorial) is extracted out to separate the
+// code specific to factorial from the code for making recursion possible.
 verifyFactorial(
   (function (makeFactorial) {
     return makeFactorial(makeFactorial);
@@ -132,6 +169,7 @@ verifyFactorial(
   ))
 );
 
+// The code specific to factorial is extracted out.
 verifyFactorial(
   (function (func) {
     return (function (makeFactorial) {
@@ -155,6 +193,7 @@ verifyFactorial(
   ))
 );
 
+// The remaining function is the Y-combinator.
 var Y = function (le) {
   return (function (f) {
     return f(f);
