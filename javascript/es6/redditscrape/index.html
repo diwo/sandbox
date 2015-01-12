@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Best comment of each /r/funny sub-reddit post</title>
+    <style>
+      * {
+        font-family: sans-serif;
+        font-weight: lighter;
+      }
+      h1 {
+        font-size: 2.5em;
+      }
+      #comments {
+        font-size: 1.2em;
+      }
+      #comments > .comment {
+        padding-top: 1em;
+      }
+      #comments > .comment:first-child {
+        padding-top: 0;
+      }
+      #comments > .comment > .context {
+        font-size: 0.8em;
+      }
+      #comments .comment > .body:before,
+      #comments .comment > .body:after {
+        content: "\"";
+      }
+      #comments .score:before {
+        content: "(";
+      }
+      #comments .score:after {
+        content: " points)";
+      }
+      #comments .context {
+        padding-left: 1.5em;
+        padding-top: 0.2em;
+      }
+      #comments .context.comment > .body:before {
+        content: "In reply to: ";
+      }
+      #comments .context.post > .body:before {
+        content: "On post: ";
+      }
+      #comments .context > .body:before {
+        font-style: italic;
+      }
+      #comments .author,
+      #comments .score {
+        font-style: italic;
+        font-size: 0.7em;
+        padding-left: 0.4em;
+      }
+      #comments .author:before {
+        content: "-- ";
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Best comment of each /r/funny sub-reddit post</h1>
+    <div id="comments"></div>
+
+    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
+    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
+
+    <script type="module" src="redditscrape.js"></script>
+  </body>
+</html>
