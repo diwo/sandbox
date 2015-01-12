@@ -98,6 +98,7 @@
             }
 
             let nestedNode = document.createElement('span');
+            nestedNode.className = 'content';
             nestedNode.innerHTML = content;
 
             if (link) {
