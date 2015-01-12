@@ -46,6 +46,10 @@
     addCommentChainToDom(topComment);
   }
 
+  function handleDone() {
+    hideSpinner();
+  }
+
   function addCommentChainToDom(commentChain) {
     class DivBuilder {
       constructor(...classNames) {
@@ -151,6 +155,10 @@
     document.getElementById('comments').appendChild(createDiv(commentChain));
   }
 
+  function hideSpinner() {
+    document.getElementById('spinner').style.display = 'none';
+  }
+
   var json = getJSON(`${redditBaseUrl}/r/funny.json`);
   json.then(
     function(json) {
@@ -183,6 +191,6 @@
     function(error) {
       console.error(error);
     }
-  );
+  ).then(handleDone);
 
 })();

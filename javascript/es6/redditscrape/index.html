@@ -54,12 +54,18 @@
       #comments .author:before {
         content: "-- ";
       }
+      #spinner img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
     </style>
   </head>
 
   <body>
     <h1>Best comment of each /r/funny sub-reddit post</h1>
     <div id="comments"></div>
+    <div id="spinner"><img src="http://sandbox.dickson.io/redditscrape/spinner.gif" /></div>
 
     <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
     <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
