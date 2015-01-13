@@ -70,6 +70,10 @@
     <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
     <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
 
-    <script type="module" src="redditscrape.js"></script>
+    <script type="module">
+      import scrapeSubreddit from './redditscrape';
+      scrapeSubreddit('funny');
+    </script>
+
   </body>
 </html>

@@ -1,167 +1,166 @@
 'use strict';
 
-(function() {
+const redditBaseUrl = 'https://www.reddit.com';
 
-  const redditBaseUrl = 'https://www.reddit.com';
-
-  function get(url) {
-    return new Promise(function(resolve, reject) {
-      var request = new XMLHttpRequest();
-      request.open('get', url);
-      request.onload = function() {
-        if (this.status === 200) {
-          resolve(this);
-        } else {
-          reject(`Error loading url ${url}: got status ${this.status}`);
-        }
-      };
-      request.onerror = function() {
-        reject(Error(`Error loading ${url}`));
-      };
-
-      request.send();
-    });
-  }
-
-  function getJSON(url) {
-    return get(url)
-        .then(response => response.responseText)
-        .then(JSON.parse);
-  }
-
-  function* commentsGen(postsWrapperNode, context) {
-    for (let childNode of postsWrapperNode.data.children) {
-      let data = childNode.data;
-      if (data.body && data.author) {
-        let commentChain = { data, context };
-        yield commentChain;
-        if (data.replies) {
-          yield* commentsGen(data.replies, commentChain);
-        }
-      }
-    }
-  }
-
-  function handleTopComment(topComment) {
-    if (topComment) {
-      addCommentChainToDom(topComment);
-    }
-  }
-
-  function handleDone() {
-    hideSpinner();
-  }
-
-  function addCommentChainToDom(commentChain) {
-    class DivBuilder {
-      constructor(...classNames) {
-        this.classNames = classNames;
-      }
-
-      addClassNames(...classNames) {
-        this.classNames.push(...classNames);
-        return this;
-      }
-
-      withBody(body) {
-        this.body = body;
-        return this;
-      }
-
-      withAuthor(author) {
-        this.author = author;
-        return this;
-      }
-
-      withScore(score) {
-        this.score = score;
-        return this;
-      }
-
-      withContext(contextDiv) {
-        this.contextDiv = contextDiv;
-        return this;
-      }
-
-      build() {
-        var div = document.createElement('div');
-        div.className = this.classNames.join(' ');
-
-        for (let prop of ['body', 'author', 'score']) {
-          if (this[prop]) {
-            let childNode = document.createElement('span');
-            childNode.className = prop;
-
-            let content = this[prop];
-            // Variable must be reset due to traceur bug:
-            // https://github.com/google/traceur-compiler/issues/1567
-            let link = null;
-            if (typeof this[prop] === 'object') {
-              // Note: cannot destructure without var/let keyword, i.e.
-              // { content, link } = this[prop];  <-- invalid
-              content = this[prop].content;
-              link = this[prop].link;
-            }
-
-            let nestedNode = document.createElement('span');
-            nestedNode.className = 'content';
-            nestedNode.innerHTML = content;
-
-            if (link) {
-              let anchorNode = document.createElement('a');
-              anchorNode.href = link;
-              anchorNode.appendChild(nestedNode);
-
-              nestedNode = anchorNode;
-            }
-
-            childNode.appendChild(nestedNode);
-
-            div.appendChild(childNode);
-          }
-        }
-
-        if (this.contextDiv) {
-          div.appendChild(this.contextDiv);
-        }
-
-        return div;
-      }
-    }
-
-    function createDiv(post, ...additionalClassNames) {
-      var divBuilder = new DivBuilder();
-      var data = post.data;
-
-      if (post.hasOwnProperty('context')) {
-        divBuilder = divBuilder
-            .addClassNames('comment')
-            .withBody(data.body)
-            .withContext(createDiv(post.context, 'context'));
+function get(url) {
+  return new Promise(function(resolve, reject) {
+    var request = new XMLHttpRequest();
+    request.open('get', url);
+    request.onload = function() {
+      if (this.status === 200) {
+        resolve(this);
       } else {
-        divBuilder = divBuilder
-            .addClassNames('post')
-            .withBody({
-              content: data.title,
-              link: `${redditBaseUrl}${data.permalink}`
-            });
+        reject(`Error loading url ${url}: got status ${this.status}`);
       }
+    };
+    request.onerror = function() {
+      reject(Error(`Error loading ${url}`));
+    };
 
-      return divBuilder
-        .addClassNames(...additionalClassNames)
-        .withAuthor(data.author)
-        .withScore(data.score)
-        .build();
+    request.send();
+  });
+}
+
+function getJSON(url) {
+  return get(url)
+      .then(response => response.responseText)
+      .then(JSON.parse);
+}
+
+function* commentsGen(postsWrapperNode, context) {
+  for (let childNode of postsWrapperNode.data.children) {
+    let data = childNode.data;
+    if (data.body && data.author) {
+      let commentChain = { data, context };
+      yield commentChain;
+      if (data.replies) {
+        yield* commentsGen(data.replies, commentChain);
+      }
+    }
+  }
+}
+
+function handleTopComment(topComment) {
+  if (topComment) {
+    addCommentChainToDom(topComment);
+  }
+}
+
+function handleDone() {
+  hideSpinner();
+}
+
+function addCommentChainToDom(commentChain) {
+  class DivBuilder {
+    constructor(...classNames) {
+      this.classNames = classNames;
     }
 
-    document.getElementById('comments').appendChild(createDiv(commentChain));
+    addClassNames(...classNames) {
+      this.classNames.push(...classNames);
+      return this;
+    }
+
+    withBody(body) {
+      this.body = body;
+      return this;
+    }
+
+    withAuthor(author) {
+      this.author = author;
+      return this;
+    }
+
+    withScore(score) {
+      this.score = score;
+      return this;
+    }
+
+    withContext(contextDiv) {
+      this.contextDiv = contextDiv;
+      return this;
+    }
+
+    build() {
+      var div = document.createElement('div');
+      div.className = this.classNames.join(' ');
+
+      for (let prop of ['body', 'author', 'score']) {
+        if (this[prop]) {
+          let childNode = document.createElement('span');
+          childNode.className = prop;
+
+          let content = this[prop];
+          // Variable must be reset due to traceur bug:
+          // https://github.com/google/traceur-compiler/issues/1567
+          let link = null;
+          if (typeof this[prop] === 'object') {
+            // Note: cannot destructure without var/let keyword, i.e.
+            // { content, link } = this[prop];  <-- invalid
+            content = this[prop].content;
+            link = this[prop].link;
+          }
+
+          let nestedNode = document.createElement('span');
+          nestedNode.className = 'content';
+          nestedNode.innerHTML = content;
+
+          if (link) {
+            let anchorNode = document.createElement('a');
+            anchorNode.href = link;
+            anchorNode.appendChild(nestedNode);
+
+            nestedNode = anchorNode;
+          }
+
+          childNode.appendChild(nestedNode);
+
+          div.appendChild(childNode);
+        }
+      }
+
+      if (this.contextDiv) {
+        div.appendChild(this.contextDiv);
+      }
+
+      return div;
+    }
   }
 
-  function hideSpinner() {
-    document.getElementById('spinner').style.display = 'none';
+  function createDiv(post, ...additionalClassNames) {
+    var divBuilder = new DivBuilder();
+    var data = post.data;
+
+    if (post.hasOwnProperty('context')) {
+      divBuilder = divBuilder
+          .addClassNames('comment')
+          .withBody(data.body)
+          .withContext(createDiv(post.context, 'context'));
+    } else {
+      divBuilder = divBuilder
+          .addClassNames('post')
+          .withBody({
+            content: data.title,
+            link: `${redditBaseUrl}${data.permalink}`
+          });
+    }
+
+    return divBuilder
+      .addClassNames(...additionalClassNames)
+      .withAuthor(data.author)
+      .withScore(data.score)
+      .build();
   }
 
-  getJSON(`${redditBaseUrl}/r/funny.json`)
+  document.getElementById('comments').appendChild(createDiv(commentChain));
+}
+
+function hideSpinner() {
+  document.getElementById('spinner').style.display = 'none';
+}
+
+export default function scrapeSubreddit(subreddit) {
+  getJSON(`${redditBaseUrl}/r/${subreddit}.json`)
     .then(function(json) {
       return json.data.children
           .filter(post => !post.data.over_18)
@@ -185,5 +184,4 @@
     })
     .catch(e => { console.log(e); })
     .then(handleDone);
-
-})();
+}
