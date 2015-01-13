@@ -178,10 +178,10 @@ export default function scrapeSubreddit(subreddit) {
                     return sortedComments.length ? sortedComments[0] : null;
                   })
                   .then(handleTopComment)
-                  .catch(e => { console.log(e); });
+                  .catch(e => { console.error(e); });
             }, Promise.resolve()
           );
     })
-    .catch(e => { console.log(e); })
+    .catch(e => { console.error(e); })
     .then(handleDone);
 }
