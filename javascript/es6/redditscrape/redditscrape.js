@@ -43,7 +43,9 @@
   }
 
   function handleTopComment(topComment) {
-    addCommentChainToDom(topComment);
+    if (topComment) {
+      addCommentChainToDom(topComment);
+    }
   }
 
   function handleDone() {
@@ -91,8 +93,8 @@
             childNode.className = prop;
 
             let content = this[prop];
-            // If link not set to null, it retains value from previous iteration
-            // Is this part of the specification or a traceur bug?
+            // Variable must be reset due to traceur bug:
+            // https://github.com/google/traceur-compiler/issues/1567
             let link = null;
             if (typeof this[prop] === 'object') {
               // Note: cannot destructure without var/let keyword, i.e.
@@ -159,9 +161,8 @@
     document.getElementById('spinner').style.display = 'none';
   }
 
-  var json = getJSON(`${redditBaseUrl}/r/funny.json`);
-  json.then(
-    function(json) {
+  getJSON(`${redditBaseUrl}/r/funny.json`)
+    .then(function(json) {
       return json.data.children
           .filter(post => !post.data.over_18)
           .sort((p1, p2) => p2.data.score - p1.data.score)
@@ -171,26 +172,18 @@
             function(promiseChain, promise) {
               return promiseChain
                   .then(() => promise)  // wait for resolution
-                  .then(
-                    function(postJsonRoot) {
-                      var originalPostData = postJsonRoot[0].data.children[0].data;
-                      var comments = Array.from(commentsGen(postJsonRoot[1], { data: originalPostData }));
-
-                      if (comments.length > 0) {
-                        let topComment = comments.sort((c1, c2) => c2.data.score - c1.data.score)[0];
-                        handleTopComment(topComment);
-                      }
-                    },
-                    function(error) {
-                      console.error(error);
-                    }
-                  );
+                  .then(function(postJsonRoot) {
+                    var originalPostData = postJsonRoot[0].data.children[0].data;
+                    var comments = Array.from(commentsGen(postJsonRoot[1], { data: originalPostData }));
+                    var sortedComments = comments.sort((c1, c2) => c2.data.score - c1.data.score);
+                    return sortedComments.length ? sortedComments[0] : null;
+                  })
+                  .then(handleTopComment)
+                  .catch(e => { console.log(e); });
             }, Promise.resolve()
           );
-    },
-    function(error) {
-      console.error(error);
-    }
-  ).then(handleDone);
+    })
+    .catch(e => { console.log(e); })
+    .then(handleDone);
 
 })();
