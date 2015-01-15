@@ -2,6 +2,7 @@
   "jspm": {
     "dependencies": {
       "assert": "^0.1.0",
+      "handlebars": "npm:handlebars@^2.0.0",
       "interface-verify": "github:diwo/interface-verify@master"
     }
   }
