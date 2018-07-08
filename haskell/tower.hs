@@ -7,7 +7,9 @@ module Tower ( mkState
              , solve
              , solved
              , sample
+             , sample_homo
              , test
+             , testAll
              ) where
 
 import Data.List
@@ -93,7 +95,7 @@ solve state
         tops              = peekAll state
         (jsm:jmed:_)      = filter isJust $ sort tops
         src               = fromJust $ elemIndex jsm tops
-        dest              = fromJust $ elemIndex jmed tops
+        dest              = 2 - (fromJust $ elemIndex jmed $ reverse tops)
         cnt               = sizeUntil (fromJust jmed) $ stacks state !! src
 
 moveMulti :: State -> Count -> Col -> Col -> ([Move], State)
@@ -119,14 +121,16 @@ run state [] = state
 run state ((src, dest):moves) = run newState moves
   where newState = move' state src dest
 
-step :: State -> [Move] -> IO ()
-step state moves = do
+step :: State -> IO ()
+step state = step' state $ solve state
+
+step' :: State -> [Move] -> IO ()
+step' state moves = do
   print state
   if null moves
     then return ()
-    else do
-      readCr
-      step newState (tail moves)
+    else do readCr
+            step' newState (tail moves)
   where newState    = move' state src dest
         (src, dest) = head moves
         readCr      = do putStrLn "Press return to continue..."
@@ -136,12 +140,22 @@ step state moves = do
                            else readCr
 
 sample = mkState [s1, s2, s3]
-  where s1 = mkStack [6, 1]
-        s2 = mkStack [4, 2]
-        s3 = mkStack [5, 4, 3]
+  where s1 = mkStack [6, 4, 1]
+        s2 = mkStack [5, 2]
+        s3 = mkStack [3]
 
-test :: IO ()
-test = if solved $ run sample $ solve sample
-  then putStrLn "Solved"
-  else putStrLn "Not solved"
+sample_homo = mkState [s1, s2, s3]
+  where s1 = mkStack [9, 9]
+        s2 = mkStack [9, 9, 9]
+        s3 = mkStack [9]
+
+test :: State -> IO ()
+test state = do
+  print state
+  if solved $ run state $ solve state
+    then putStrLn "Solved\n"
+    else putStrLn "Not solved\n"
+
+testAll :: IO ()
+testAll = mapM_ test [sample, sample_homo]
 
